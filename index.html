@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+  <title>Apple Watch Visualization</title>
+  <style>
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      background-color: #f2f2f2;
+    }
+
+    .product-viewer {
+      margin: auto;
+    }
+
+    .loader-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-top: -13px;
+      margin-bottom: 0;
+      margin-left: -13px;
+      display: block;
+      -webkit-transform: rotate(45deg);
+              transform: rotate(45deg);
+      -webkit-transform-origin: center center;
+              transform-origin: center center;
+      -webkit-animation-name: rotateLoadingSpinner;
+              animation-name: rotateLoadingSpinner;
+      -webkit-animation-duration: 1s;
+              animation-duration: 1s;
+      -webkit-animation-timing-function: linear;
+              animation-timing-function: linear;
+      -webkit-animation-iteration-count: infinite;
+              animation-iteration-count: infinite;
+    }
+
+    @-webkit-keyframes rotateLoadingSpinner {
+      from {
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg)
+      }
+      to {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg)
+      }
+    }
+
+    @keyframes rotateLoadingSpinner {
+      from {
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg)
+      }
+      to {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg)
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <svg id="loader-spinner" class="loader-spinner" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="12 12 26 26" enable-background="new 12 12 26 26"><path fill="#0B88CA" d="M36.203 20.902c.47 1.28.74 2.657.74 4.098 0 6.586-5.357 11.942-11.943 11.942S13.057 31.586 13.057 25 18.414 13.057 25 13.057c1.862 0 3.62.44 5.192 1.204l.478-.94C28.954 12.483 27.034 12 25 12c-7.168 0-13 5.832-13 13s5.832 13 13 13 13-5.832 13-13c0-1.577-.297-3.083-.812-4.482l-.985.384z"/></svg>
+
+  <canvas id="product-viewer" class="product-viewer" width="520" height="520"></canvas>
+
+  <script>
+    (function(){
+
+      // Config
+      var assetSize = 'large'; // small, small_2x, medium, medium_2x, large, large_2x
+      var degreeInterval = 2; // Apple Watch page uses 4 degree intervals
+      var rotationSpeed = 16.7; // 1000ms / 60(fps)
+      var collection = 'apple-watch-sport' // apple-watch-sport, apple-watch, apple-watch-edition
+      var model = 'silver-aluminum-case-white-sport-band'; // figure it out
+
+      // Image assets
+      var bucketPath = 'http://images.apple.com/media/us/watch/2015/a718f271_b19c_47d8_928d_d108fc5d702a/product-viewer/';
+      var url = bucketPath + collection + '/' + model + '/360/' + assetSize + '/jpg/' + model + '_' + '#NUMBER#' + '.jpg';
+      var currentImage;
+      var assetSrc;
+      var images = [];
+      var j = 0;
+
+      // Canvas & preloader
+      var productViewer = document.getElementById('product-viewer');
+      var loaderSpinner = document.getElementById('loader-spinner');
+      var ctx = productViewer.getContext('2d');
+
+      function loadImage(src) {
+        currentImage = new Image();
+        currentImage.src = src;
+        images.push(currentImage);
+      }
+
+      function padZeros(n, width) {
+        n = n + "";
+        return n.length >= width ? n : (new Array(width - n.length + 1)).join("0") + n;
+      }
+
+      for (i = 0; i < 360; i++) {
+        if (i % degreeInterval !== 0) {
+          continue;
+        }
+        assetSrc = url.replace("#NUMBER#", padZeros(i, 4));
+        loadImage(assetSrc);
+      }
+
+      function initAnimation() {
+        setInterval(function() {
+          j = (j === images.length ? 0 : j);
+          ctx.drawImage(images[j], 0, 0, 520, 520);
+          j++;
+        }, rotationSpeed);
+      }
+
+      window.onload = function(){
+        loaderSpinner.style.display = 'none';
+        initAnimation();
+      }
+    }());
+  </script>
+</body>
+</html>
